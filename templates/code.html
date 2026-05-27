@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Code Projects{% endblock %}
+
+{% block content %}
+
+<h1>Projects</h1>
+
+{% for file, name in files %}
+    <a class="button" href="/code/{{ file }}">
+        {{ name }}
+    </a>
+    <br>
+{% endfor %}
+
+<br>
+
+<a class="back-button" href="/">Back</a>
+
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}{{ game }}{% endblock %}
+
+{% block content %}
+
+<h1 class="glow-animate">{{ game }}</h1>
+
+<!-- GIF -->
+<img src="{{ url_for('static', filename='previews/' + game + '.gif') }}" width="600">
+
+<br><br>
+
+<!-- WINDOWS -->
+<!-- WINDOWS -->
+<div class="windows-container">
+
+    <a class="button" href="/download/{{ game }}/windows">
+        Download Windows
+    </a>
+
+    <div class="windows-info">
+        <p class="normal-text">
+            Go to Downloads — your file will be there:
+            <br>
+            <b>{{ game }}.exe</b>
+        </p>
+    </div>
+
+</div>
+
+<!-- LINUX + HOVER INFO -->
+<div class="linux-container">
+
+    <a class="button" href="/download/{{ game }}/linux">
+        Download Linux
+    </a>
+
+    <div class="linux-info">
+        <p class="normal-text"><strong>To play {{ game }} on Linux:</strong></p>
+
+        <p class="normal-text">
+            1. Go to settings -> search <b>Linux Development Environment</b> → press configure, then drag {{ game }}.sh and {{ game }}.py out of textsnake.zip to linux folder before opening terminal in Launcher and typing chmod +x {{ game }}.sh *enter* chmod +x {{ game }}.py *enter*
+        </p>
+
+        <p class="normal-text">
+            2. Open terminal and run:
+            <br>
+            <code>.{{ game }}</code>
+        </p>
+    </div>
+
+</div>
+
+<br><br>
+
+<a class="back-button" href="/games">Back</a>
+
+{% endblock %}

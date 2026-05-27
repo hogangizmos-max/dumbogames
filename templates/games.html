@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Code Projects{% endblock %}
+
+{% block content %}
+
+<h1>Games</h1>
+
+{% for game in games %}
+    <a href="/game/{{ game }}" class="button">{{ game }}</button>
+    </a>
+    <br><br>
+{% endfor %}
+
+<a href="/" class="back-button">Back</a>
+
+{% endblock %}

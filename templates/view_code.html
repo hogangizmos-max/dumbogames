@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Code Projects{% endblock %}
+
+{% block content %}
+
+<h1 class="glow-animate">{{ game }} Code</h1>
+
+<a href="/code" class="back-button">Back</a>
+
+<div class="code-box">
+    <pre>{{ code }}</pre>
+</div>
+
+<br>
+
+{% endblock %}

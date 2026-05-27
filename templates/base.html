@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Site{% endblock %}</title>
+
+    <!-- GLOBAL CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+{% block content %}{% endblock %}
+
+<!-- 🔊 CLICK SOUND (GLOBAL) -->
+<audio id="clickSound" src="{{ url_for('static', filename='sounds/click.mp3') }}"></audio>
+
+<script>
+document.querySelectorAll(".button").forEach(btn => {
+    btn.addEventListener("click", () => {
+        const sound = document.getElementById("clickSound");
+        sound.currentTime = 0;
+        sound.play();
+    });
+});
+</script>
+
+</body>
+</html>

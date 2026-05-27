@@ -1,0 +1,240 @@
+import random
+import json
+import os
+move = "up.txt"
+high = "high.txt"
+trail = ["-", "|"]
+apples = "A"
+background = " "
+character = ["^", "<", "v", ">"]
+Ai = 0
+cheats = 0
+zx = 0
+boarder = 1
+def load(HIGHSCORE_FILE, aaa):
+    if os.path.exists(HIGHSCORE_FILE):
+        try:
+            with open(HIGHSCORE_FILE, 'r') as file:
+                return json.load(file)
+        except ValueError:
+            return aaa
+    return aaa
+def save(HIGHSCORE_FILE, money):
+    with open(HIGHSCORE_FILE, 'w') as file:
+        json.dump(money, file)
+ZAD = 0
+win = 0
+hscore = load(high, [0, 'NA'])
+up = load(move, ["w", "a", "s", "d"])
+format = [23, 23]
+AsDA = input("> would you like to review settings (some settings make score no"
+             "t allowed to register for high) [y]es [n]o: ")
+if AsDA in ["y", "yes", "Y", "Yes", "YES", "[Y]es", "[y]es", "[Y]es"]:
+        while ZAD == 0:
+            format = input("pick format (put in value of x, then y), or use base o"
+                          "f Chrome OS or windows by typing their name (this w"
+                           "will unregister score if not choosing OS): ")
+            if format in ["Chrome OS", "OS", "os", "Chrome", "chrome", "Os"]:
+                format = [23, 23]
+                ZAD = 1
+            elif format in ["windows", "computer", "Windows", "Computer"]:
+                format = [24, 30]
+                cheats = 1
+                ZAD = 1
+            else:
+                try:
+                    format = [int(format.split()[0]), int(format.split()[1])]
+                    format = [format[1], format[0]]
+                    cheats = 1
+                    ZAD = 1
+                except:
+                     print("you gotta choose a number")
+        if input("would you like to change keybinds from past or original"
+        "[y]es: ") in ["yes", "Yes", "[y]es", "[Y]es", "[y]", "[Y]", "YES",
+                       "Y", "y"]:
+            up = list(input("what would you like your keybinds to be; do up key"
+                       " then left then down then right"))
+            if " " in up:
+                up.remove(" ")
+        if input("would you like to customize trail [y]: ") in ["y", "[y]", "[Y]", "Y", "yes", "Yes"]:
+            trail = [""]
+            while len(trail) != 2:
+                trail = input("what would you like your trail to be: write vertica"
+                              "l then horizontal: ").split()
+        if input("would you like to customize character [y]: ") in ["[y]", "y", "Y", "[Y]", "yes", "Yes"]:
+            character = [""]
+            while len(character) != 4:
+                character = input("enter up character then left then down then right: ").split()
+        if input("would you like to change apple symble [y]: ") in ["[y]", "y", "Y", "[Y]", "yes", "Yes"]:
+            apples = input()
+        if input("would you like to change background [y]: ") in ["[y]", "y", "Y", "[Y]", "yes", "Yes"]:
+            background = input()
+        if input("would you like an AI "
+                 "(this will unregister score if turned on) [y]: ") in ["y", "Y", "[y]", "[Y]", "yes", "Yes"]:
+            Ai = 1
+            cheats = 1
+            AI = input("What would you like AI to look like: ")
+            zm = 0
+            while zm == 0:
+                AImove = int(input("how many of your moves would you like to pass before ai moves: "))
+                if AImove < 1:
+                    print(f"how would ai move every {AImove} times? retry")
+                else:
+                    zm = 1
+        if input("would you like boarder tracers [y]: ") in ["y", "Y", "[y]", "[Y]", "yes", "Yes"]:
+            boarder = 1
+        else:
+            boarder = 0
+pastp = []
+h = ""
+applep = []
+loop = 0
+past = "w"
+lose = 0
+z = ""
+player = ">"
+pts = 0
+board = [" "] * format[1]
+z = ""
+for l in board:
+    z = z + l
+board = [z] * format[0]
+playerp = [12 % len(board), 12 % len(board)]
+aip = [0, 0]
+while lose != 2 and win < 1:
+    board = [background] * format[1]
+    z = ""
+    for xa in board:
+        z = z + xa
+    board = [z] * format[0]
+    rxy = 2
+    A = 3
+    while A / 3 < pts:
+            pra = pastp[len(pastp) - A]
+            mm = pastp[(len(pastp) - A) + 2]
+            xa = pastp[(len(pastp) - A) + 1]
+            board[pra] = board[pra][:xa] + mm + board[pra][xa + 1:]
+            A = A + 3
+    while rxy <= len(applep):
+        row = int(applep[rxy - 2])
+        col = int(applep[rxy - 1])
+        board[row] = board[row][:col] + apples + board[row][col + 1:]
+        rxy = rxy + 2
+        if playerp[1] == col and playerp[0] == row:
+            applep.pop(rxy - 3)
+            applep.pop(rxy - 4)
+            print(f"{rxy}")
+            pts = pts + 1
+    r = board[playerp[0]]
+    board[playerp[0]] = r[:playerp[1]] + player + r[playerp[1] + 1:]
+    if Ai == 1:
+        r = board[aip[0]]
+        board[aip[0]] = r[:aip[1]] + AI + r[aip[1] + 1:]
+    L = 0
+    os.system("clear")
+    print("_____")
+    print(h)
+    print(f"pts: {pts}")
+    M = ""
+    if boarder == 1:
+        M = "|"
+    if lose == 0:
+        for row in board:
+            print(row + M)
+        xy = ""
+        M = ""
+        if boarder == 1:
+            M = "-"
+        for a in [M] * format[1]:
+            xy = xy + a
+        if Ai == 1:
+            zx = zx + 1
+            if zx == AImove:
+                zx = 0
+                if abs(aip[0] - playerp[0]) > abs(aip[1] - playerp[1]):
+                    if aip[0] - playerp[0] < 0:
+                        aip[0] = aip[0] + 1
+                    else:
+                        aip[0] = aip[0] - 1
+                else:
+                    if aip[1] - playerp[1] < 0:
+                        aip[1] = aip[1] + 1
+                    else:
+                        aip[1] = aip[1] - 1
+        if lose == 0:
+            W = input()
+        if W in ["loop", "Loop", "LOOP"]:
+            loop = 1
+        elif W == up[0]:
+            playerp[0] = playerp[0] - 1
+            player = character[0]
+            past = "w"
+        elif W == up[2]:
+            playerp[0] = playerp[0] + 1
+            player = character[2]
+            past = "s"
+        elif W == up[1]:
+            playerp[1] = playerp[1] - 1
+            player = character[1]
+            past = "a"
+        elif W == up[3]:
+            playerp[1] = playerp[1] + 1
+            player = character[3]
+            past = "d"
+        elif past in ["w", "W"]:
+            playerp[0] = playerp[0] - 1
+            player = character[0]
+            past = "w"
+        elif past in ["s", "S"]:
+            playerp[0] = playerp[0] + 1
+            player = character[2]
+            past = "s"
+        elif past in ["a", "A"]:
+            playerp[1] = playerp[1] - 1
+            player = character[1]
+            past = "a"
+        elif past in ["d", "D"]:
+            playerp[1] = playerp[1] + 1
+            player = character[3]
+            past = "d"
+    if Ai == 1 and aip[0] == playerp[0] and aip[1] == playerp[1]:
+        lose = 1
+    if random.randint(1, 3) == 1 and len(applep) < (format[0] * format[1]) ** 0.5:
+        applep = applep + [random.randint(0, format[0] - 1),
+                           random.randint(0, format[1] - 1)]
+    if playerp[1] > format[1] or playerp[1] < 0 or playerp[0] > format[0] or playerp[0] < 0 and loop == 0:
+        lose = 1
+    if loop == 1:
+        playerp[1] = (playerp[1]) % len(board[0])
+        playerp[0] = (playerp[0]) % len(board[0])
+    if past == "w" or past == "s":
+        pasta = trail[1]
+    else:
+        pasta = trail[0]
+    pastp = pastp + playerp + [pasta]
+    pastp = pastp[len(pastp) - (pts * 3):]
+    A = 6
+    while A / 3 < pts:
+        pra = pastp[len(pastp) - A]
+        xa = pastp[(len(pastp) - A) + 1]
+        A = A + 3
+        if xa == playerp[1] and pra == playerp[0]:
+            lose = 1
+    if lose == 1:
+        lose = 2
+    if playerp[1] * playerp[0] == format[1] * format[0]:
+        print("you win")
+        win = 1
+save(move, up)
+print(f"your score is {pts}, high score is {hscore[0]}, set by {hscore[1]}")
+if pts > hscore[0] and AsDA not in ["y", "yes", "Y", "Yes", "YES", "[Y]es", "[y]es", "[Y]es"]:
+    if input("you beat high score, would you like to save score (y): ") in ['y', 'Y', 'yes', 'Yes', 'YES']:
+        hscore = [pts, input('what would you like your username to be saved as: ')]
+elif pts > hscore[0]:
+    print('you can not register for high score because you turned on settings not allowed for scoring ')
+elif pts == hscore:
+    print('you tied with highscore')
+else:
+    print('highscore beat you')
+   
+

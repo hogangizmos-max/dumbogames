@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Code Projects{% endblock %}
+
+{% block content %}
+
+
+<h2 class="rainbow">DumboGames</h2>
+
+<h1>Home</h1>
+
+<a href="/games" class="button">Go to Games</a>
+
+<a href="/code" class="button">view code</a>
+
+<audio id="clickSound" src="{{ url_for('static', filename='sounds/click.mp3') }}"></audio>
+
+{% endblock %}

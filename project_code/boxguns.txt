@@ -1,0 +1,529 @@
+import pygame # type: ignore
+import sys
+import math
+import random
+import os
+import json
+highfile = 'highfile.txt'
+def load(HIGHSCORE_FILE, aaa):
+    if os.path.exists(HIGHSCORE_FILE):
+        try:
+            with open(HIGHSCORE_FILE, 'r') as file:
+                return json.load(file)
+        except ValueError:
+            return aaa
+    return aaa
+def save(HIGHSCORE_FILE, money):
+    with open(HIGHSCORE_FILE, 'w') as file:
+        json.dump(money, file)
+pygame.init()
+screen = pygame.display.set_mode((800, 600))
+clock = pygame.time.Clock()
+x = 400
+y = 300
+xybb = [0, 0]
+money = 0
+maxhealth = 100
+dropitemsaaa = 0
+health = maxhealth
+speed = 200
+gun = 0
+dash_vel = [0, 0]
+botc = 0
+bots = []
+bullettime = 0
+sspeed = 100
+abcd = 0
+zys = 0
+zyb = 0
+iofjdsa = 0
+zyr = 0
+def pyprint(message, scale, color, position):
+    font = pygame.font.SysFont(None, scale)
+    screen.blit(font.render(str(message), True, color), position)
+def pyprin(message, scale, color, position, font):
+    font = pygame.font.SysFont(font, scale)
+    screen.blit(font.render(str(message), True, color), position)
+def sysexit():
+    dsafjosadf = False
+    fdas = 0
+    menu = []
+    menu.append(pygame.draw.rect(screen, (0, 230, 35), (200, 300, 130, 130)))
+    menu.append(pygame.draw.rect(screen, (0, 230, 35), (400, 300, 130, 130)))
+    menu.append(pygame.draw.rect(screen, (0, 230, 35), (600, 300, 130, 130)))
+    while True:
+        dt = clock.tick(24) / 1000
+        mouse = pygame.mouse.get_pos()
+        if dsafjosadf == True:
+            screen.fill((0, 0, 0))
+            prnting = 10
+            i = 0
+            while i < len(highscores) - 1 and prnting < 600:
+                prnting += 20
+                i += 1
+                pyprint(f"{highscores[index][0]}.....{highscores[index][1]}", 20, (255, 255, 255), (20, prnting))
+            menu.append(pygame.draw.rect(screen, (0, 230, 35), (100, 200, 200, 100)))
+        else:
+            if menu[0].collidepoint((mouse[0], mouse[1])):
+                men[0] = [180, 150]
+            elif menu[1].collidepoint((mouse[0], mouse[1])):
+                men[1] = [380, 150]
+            elif menu[2].collidepoint((mouse[0], mouse[1])):
+                men[2] = [580, 150]
+            else:
+                men = [[200, 130], [400, 130], [600, 130]]
+            if fdas < 150:
+                fdas += 100 * dt
+            screen.fill((1 * fdas, 0, 0))
+            pyprint('YOU DIED', 100, (255 / fdas, 0, 0), (100, 100))
+            menu.append(pygame.draw.rect(screen, (0, 230, 35), (men[0][0], 300, men[0][1], men[0][1])))
+            pyprint('Quit', 25, (255, 255, 255), (230, 300))
+            menu.append(pygame.draw.rect(screen, (0, 230, 35), (men[1][0], 300, men[1][1], men[1][1])))
+            pyprint('coming soon', 25, (255, 255, 255), (430, 300))
+            menu.append(pygame.draw.rect(screen, (0, 230, 35), (men[2][0], 300, men[2][1], men[2][1])))
+            pyprint('highscores', 25, (255, 255, 255), (630, 300))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if menu[0].collidepoint(mouse):
+                    pygame.quit()
+                    sys.exit()
+                if menu[2].collidepoint(mouse) and dsafjosadf == False:
+                    dsafjosadf = not dsafjosadf
+                    highscores = load(highfile, [])
+        pygame.display.flip()
+a = 0
+pts = 0
+explosions = []
+selected = False
+bullets = []
+dash = 1
+bla = 0
+gotgun = ''
+selec = 0
+buyoy = [0, '']
+shopo = False
+WIDTH, HEIGHT = 640, 480
+inventory = ['pistol']
+                  #speed/heal
+                  # damage
+                  #       size
+                  #          chance
+                  #            shoot sleep
+                  #                pelets
+                  #                      autoshoot
+                  #                           explosion
+                  #                               price                                                                                                                                                                                                                                                                                                                                                                                              # heal price v   
+                                                                                                                                                                                                                                                                                                                                                                                                                                              # total amount v
+                                                                                                                                                                                                                                                                                                                                                                                                                                    #              chance v
+                                                                                                                                                                                                                                                                                                                                                                                                                                        #       amount v
+                                                                                                                                                                                                                                                                                                                                                                                                                                    # health back v
+guns = [['pistol', 400, 12, 5, 0, 0.2, 1, 0, (0, 0), 10], ['bazooka', 200, 100, 20, 6, 1, 1, 0, (0, 0), 38], ['AR', 500, 10, 8, 2, 0.14, 1, 0, (0, 0), 200], ['sniper', 1000, 200, 2, 6, 2, 1, 0, (0, 0), 40], ['shotgun', 200, 17, 4, 0.4, 0.5, 5, 0, (0, 0), 500], ['good', 500, 100, 20, .08, 0.01, 4, 1, (0, 0), 2000], ['minigun', 500, 6, 3, 0.8, 0.08, 1, 1, (0, 0), 400], ['rpg', 300, 20, 10, .1, 2, 1, 0, (60, 200), 110], ['medkit', 'heal', 10, 3, 10, 3, 15], ['bandages', 'heal', 6, 6, 10, 6, 10], ['shorty', 400, 35, 5, 5, 1, 2, 0, (0, 0), 200], ['uzi', 800, 10, 2, 6, 0.1, 1, 1, (0, 0), 150]]
+chances = []
+dead = 0
+z = 0
+total = 0
+sellprompt = False
+sellmessage = ''
+ndex = 0
+for g in guns:
+    total += g[4]
+    chances.append((g, total))
+    z = 1
+while dead == 0:
+    bbbbbbbb = 0
+    screen.fill((0, 0, 0))
+    inventorypop = pygame.draw.rect(screen, (255, 100, 0), (650, 25, 100, 50))
+    pyprint('inventory', 20, (255, 255, 255), (670, 40))
+    dt = clock.tick(24) / 1000
+    if selected == True:
+        if shopo == 0:
+            pyprint(f"inventory", 50, (255, 255, 255), (350, 0))
+            mx, my = pygame.mouse.get_pos()
+            drop = pygame.draw.rect(screen, (255, 255, 255), (10, 500, 150, 50))
+            for index, i in enumerate(guns):
+                if i[0] == inventory[gun]:
+                    if isinstance(i[1], int):
+                        afdsa = int(i[9] / 2)
+                    else:
+                        afdsa = int(i[6] / 2) * i[3]
+            pyprint(f"sell for ${afdsa}", 25, (0, 0, 0), (15, 520))
+            shopb = pygame.draw.rect(screen, (0, 0, 255), (700, 500, 80, 50))
+            pyprint('shop', 40, (255, 255, 255), (710, 510))
+            if sellprompt == False:
+                slpt = pygame.draw.rect(screen, (255, 10, 10), (180, 500, 150, 50))
+            if sellprompt == True:
+                slpt = pygame.draw.rect(screen, (10, 255, 10), (180, 500, 150, 50))
+                pyprint("press enter to exit", 20, (255, 255, 255), (180, 550))
+            pyprint('sell pts', 40, (255, 255, 255), (185, 505))
+            if sellmessage != '':
+                pyprint(f"selling: {sellmessage}", 20, (255, 255, 255), (180, 450))
+                pyprint(f"sell for: {int(sellmessage) * 7}", 20, (255, 255, 255), (180, 400))
+            dssda = [50, 400]
+            totalh = 0
+            for i in guns:
+                m = 's'
+                if i[1] == 'heal' and i[0] in inventory:
+                    if i[3] < 2:
+                        m = ''
+                    totalh += i[2] * i[3]
+                    pyprint(f"{i[0]}{m}: {i[3]}", 20, (255, 255, 255), (dssda))
+                    dssda[1] += 20
+            pyprint(f"total healing: {totalh}", 20, (255, 255, 255), (dssda[0], dssda[1]))
+            pyprint(f"money: {money}", 30, (0, 255, 0), (100, 10))
+            if sellmessage != '':
+                sellsfds = pygame.draw.rect(screen, (255, 0, 0), (280, 450, 100, 20))
+                pyprint('sell', 20, (255, 255, 255), (285, 455))
+            if xaaa == 1:
+                if len(inventory) > 0:
+                    if gun == 0:
+                        i1color, i1colora = [(255, 0, 100), (255, 30, 90)]
+                    else:
+                        i1color, i1colora = [(230, 255, 30), (255, 255, 0)]
+                    if item1.collidepoint((mx, my)):
+                        item1 = pygame.draw.rect(screen, (i1color), (190, 190, 120, 120))
+                        pyprint(inventory[0], int(280 / len(inventory[0])), (0, 0, 0), (200, 210))
+                    else:
+                        item1 = pygame.draw.rect(screen, (i1colora), (200, 200, 100, 100))
+                        pyprint(inventory[0], int(230 / len(inventory[0])), (0, 0, 0), (210, 210))
+                if len(inventory) > 1:
+                    if gun == 1:
+                        i2color, i2colora = [(255, 0, 100), (255, 30, 90)]
+                    else:
+                        i2color, i2colora = [(230, 255, 30), (255, 255, 0)]
+                    if item2.collidepoint((mx, my)):
+                        item2 = pygame.draw.rect(screen, (i2color), (390, 190, 120, 120))
+                        pyprint(inventory[1], int(280 / len(inventory[0])), (0, 0, 0), (400, 210))
+                    else:
+                        item2 = pygame.draw.rect(screen, (i2colora), (400, 200, 100, 100))  
+                        pyprint(inventory[1], int(230 / len(inventory[0])), (0, 0, 0), (410, 210))
+                if len(inventory) > 2:
+                    if gun == 2:
+                        i3color, i3colora = [(255, 0, 100), (255, 30, 90)]
+                    else:
+                        i3color, i3colora = [(230, 255, 30), (255, 255, 0)]
+                    if item3.collidepoint((mx, my)):
+                        item3 = pygame.draw.rect(screen, (i3color), (590, 190, 120, 120))
+                        pyprint(inventory[2], int(280 / len(inventory[0])), (0, 0, 0), (600, 210))
+                    else:
+                        item3 = pygame.draw.rect(screen, (i3colora), (600, 200, 100, 100))    
+                        pyprint(inventory[2], int(230 / len(inventory[0])), (0, 0, 0), (610, 210))
+            elif len(inventory) > 0:
+                item1 = pygame.draw.rect(screen, (255, 255, 0), (200, 200, 100, 100))
+                if len(inventory) > 1:
+                    item2 = pygame.draw.rect(screen, (255, 255, 0), (400, 200, 100, 100))
+                if len(inventory) > 2:
+                    item3 = pygame.draw.rect(screen, (255, 255, 0), (600, 200, 100, 100))
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN and sellprompt == False:
+                    if inventorypop.collidepoint(event.pos):
+                        selected = not selected
+                    if len(inventory) > 0:
+                        if item1.collidepoint(event.pos):
+                            gun = 0
+                    if len(inventory) > 1:
+                        if item2.collidepoint(event.pos):
+                            gun = 1
+                    if len(inventory) > 2:
+                        if item3.collidepoint(event.pos):
+                            gun = 2
+                    if drop.collidepoint(event.pos) and len(inventory) > 1:
+                        money += afdsa
+                        inventory.pop(gun)
+                        while len(inventory) < gun + 1:
+                            gun -= 1
+                    if shopb.collidepoint(event.pos):
+                        shopo = not shopo
+                    if slpt.collidepoint(event.pos):
+                        sellprompt = not sellprompt
+                        sellmessage = ''
+                    if sellmessage != '':
+                        if sellsfds.collidepoint(event.pos) and sellmessage != 0:
+                            pts -= int(sellmessage)
+                            money += int(sellmessage) * 7
+                            sellmessage = ''
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_e and sellprompt == False:
+                        selected = not selected
+                    if sellprompt == True:
+                        if event.unicode in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] and len(list(str(sellmessage))) < 5:
+                            sellmessage += event.unicode
+                        if event.key == pygame.K_RETURN:
+                            sellprompt = not sellprompt
+                            if sellmessage != '':
+                                sellmessage = min(pts, int(sellmessage))
+                        if event.key == pygame.K_BACKSPACE:
+                            sellmessage = sellmessage[:len(sellmessage) - 1]
+            pygame.display.flip()
+            xaaa = 1
+        else:
+            if dropitemsaaa > 0:
+                dropitemsaaa -= 1 * dt
+            if buyoy[0] > 0:
+                buyoy[0] -= dt
+            pyprin('shop', 40, (0, 0, 255), (250, 30), "Courier New")
+            buyss = pygame.draw.rect(screen, (255, 255, 255), (20, 500, 100, 50))
+            pyprin('buy', 20, (0, 255, 0), (25, 510), "Courier New")
+            shopc = pygame.draw.rect(screen, (0, 0, 255), (640, 500, 130, 50))
+            pyprint('inventory', 30, (255, 255, 255), (650, 510))
+            buttonsda = [100, 150]
+            gunbob = []
+            for index, i in enumerate(guns):
+                if index == selec:
+                    gunbob.append(pygame.draw.rect(screen, (200, 0, 100), (buttonsda[0], buttonsda[1], 100, 50))) # type: ignore
+                else:
+                    gunbob.append(pygame.draw.rect(screen, (255, 0, 0), (buttonsda[0], buttonsda[1], 100, 50))) # type: ignore
+                pyprint(i[0], 30, (255, 255, 255), (buttonsda))
+                buttonsda[0] += 130
+                if buttonsda[0] >= 540:
+                    buttonsda[1] += 80
+                    buttonsda[0] = 100
+            if isinstance(guns[selec][1], int):
+                pyprint(f"cost: {guns[selec][9]}", 30, (255, 255, 255), (200, 100))
+            else:
+                pyprint(f"cost: {guns[selec][6]}", 30, (255, 255, 255), (200, 100))
+            pyprint(f"money: {money}", 30, (0, 255, 0), (100, 10))
+            mouse = pygame.mouse.get_pos()      
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    for index, i in enumerate(gunbob):
+                        if i.collidepoint(mouse): # type: ignore
+                             selec = index
+                    if shopc.collidepoint(event.pos):
+                        shopo = not shopo
+                    if buyss.collidepoint(event.pos):
+                        if len(inventory) >= 3:
+                            buyoy = [1, 'inventory full']
+                        else:
+                            if isinstance(guns[selec][1], int):
+                                fdsafjsladfsdfa = 9
+                            else:
+                                fdsafjsladfsdfa = 6
+                            if money < guns[selec][fdsafjsladfsdfa]:
+                                buyoy = [1, 'not enough money']
+                            else:
+                                if guns[selec][0] in inventory:
+                                    buyoy = [1, f"already have {guns[selec][0]}"]
+                                else:
+                                    money -= guns[selec][fdsafjsladfsdfa]
+                                    inventory.append(guns[selec][0])
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_e:
+                        selected = not selected
+            if buyoy[0] > 0:
+                pyprint(buyoy[1], 80, (max(int(255 * buyoy[0]), 1), 0, 0), (200, 400))
+            pygame.display.flip()
+    else:
+        dropitemsaaa -= 1 * dt
+        for i in range(len(explosions) - 1, -1, -1):
+            exe = explosions[i]
+            exe[3] -= dt
+            exe[4] += exe[5] * dt * 4
+            exe[1] -= exe[5] * dt / 2
+            exe[0] -= exe[5] * dt / 2
+            if exe[3] <= 0:
+                explosions.pop(i)
+        bla -= dt
+        bullettime += dt
+        xaaa = 0
+        botc += 1 * dt
+        if botc >= random.randint(0, 50) and len(bots) < 5:
+            bots.append((random.randint(0, 800), random.randint(0, 600), random.randint(4, 10) * 10))               
+            while abs(bots[len(bots) - 1][0] - x) < 200 and abs(bots[len(bots) - 1][0] - x + 50) < 200 and abs(bots[len(bots) - 1][1] - y) < 200 and abs(bots[len(bots) - 1][1] - y + 50) < 200:
+                bots.pop(len(bots) - 1)
+                bots.append((random.randint(0, 800), random.randint(0, 600), random.randint(4, 10) * 10))
+            botc = 0
+        if len(bots) > 0:
+            for i, bot in enumerate(bots):
+                botx, boty, bothealth = bot
+                move21 = x - botx
+                move22 = y - boty
+                dist = math.sqrt(move21**2 + move22**2)
+                if dist != 0:
+                    move21 /= dist
+                    move22 /= dist
+                botx += move21 * 100 * dt
+                boty += move22 * 100 * dt
+                if botx < x + 50 and botx + bothealth > x and boty < y + 50 and boty + bothealth > y:
+                    health -= int(100 * dt)
+                    if health <= 0:
+                        sysexit()
+                bots[i] = (botx, boty, bothealth)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+            for i in guns:
+                if i[0] == inventory[gun]:
+                    bub = guns.index(i)
+            if event.type == pygame.MOUSEBUTTONDOWN or iofjdsa == 1:
+                if iofjdsa == 0:
+                    if inventorypop.collidepoint(event.pos):
+                        selected = not selected
+                        bbbbbbbb = 1
+                for i in guns:
+                    if i[0] == inventory[gun]:
+                        bub = guns.index(i)
+                palsad = 0
+                try:
+                    adsasdfasd = int(guns[bub][1])
+                    while bullettime >= guns[bub][5] and bbbbbbbb == 0:
+                        while palsad < guns[bub][6]:
+                            palsad += 1
+                            bullettime = 0
+                            if palsad == 1:
+                                mx, my = pygame.mouse.get_pos()
+                            elif palsad in [2, 3]:
+                                mx, my = (mx - random.randint(5, 20), my - random.randint(5, 20))
+                            elif palsad in [4, 5]:
+                                mx, my = (mx + random.randint(10, 40), my - random.randint(10, 40))
+                            dx = mx - x
+                            dy = my - y
+                            dist = math.sqrt(dx*dx + dy*dy)
+                            if dist == 0:
+                                dist = 1
+                            dx /= dist
+                            dy /= dist
+                            bullets.append([x, y, dx, dy, inventory[gun]])
+                except:
+                        health += min(guns[bub][2], maxhealth - health)
+                        guns[bub][3] -= 1
+                        if guns[bub][3] <= 0:
+                            inventory.remove(guns[bub][0])
+                            guns[bub][3] = guns[bub][5]
+                            gun -= 1
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_e:
+                    selected = not selected
+        for indexas, b in enumerate(bullets):
+            if b[0] > 800 or b[0] < 0 or b[1] > 600 or b[1] < 0:
+                bullets.pop(indexas)
+            for i in guns:
+                if i[0] == b[4]:
+                    num = guns.index(i)
+            b[0] += b[2] * guns[num][1] * dt
+            b[1] += b[3] * guns[num][1] * dt
+            for g in guns:
+                if g[0] == b[4]:
+                    bwidth = g[3]
+            pygame.draw.rect(screen, (255, 0, 0), (b[0], b[1], guns[num][3], guns[num][3]))
+            for i in range(len(bots) - 1, -1, -1):
+                bot = bots[i]
+                botx, boty, bothealth = bot
+                for explosion in explosions:
+                    if (explosion[0] < botx + bothealth and
+                        explosion[0] + explosion[5] > botx and
+                        explosion[1] < boty + bothealth and
+                        explosion[1] + explosion[5] > boty):
+                        bothealth -= explosion[5]
+                        if bothealth <= 15:
+                            bots.pop(i)
+                if botx < b[0] < botx + bothealth and boty < b[1] < boty + bothealth or botx < b[0] + bwidth < botx + bothealth and boty < b[1] + bwidth < boty + bothealth:
+                    for g in guns:
+                        if g[0] == b[4]:
+                            damage = g[2]
+                            explo = g[8]
+                    if explo[0] > 0:
+                        explosions.append([b[0], b[1], explo[0], 0.8, 10, explo[1]])
+                    bothealth -= damage
+                    if bothealth <= 15 and len(bots) > 0:
+                        bots.pop(i)
+                        pts += 1
+                        rng = random.randint(1, 1000)
+                        for  index, (guna, zsdfa) in enumerate(chances):
+                            if rng < zsdfa * 10 and rng > chances[index - 1][1] * 10 and guna[0] not in inventory and len(inventory) < 3:
+                                inventory += [guna[0]]
+                                bla = 1
+                                gotgun = guna[0]
+                    elif len(bots) > 0:
+                        bots[i] = (botx, boty, bothealth)
+                    try:
+                        bullets.remove(b)
+                        break
+                    except:
+                        break
+        keys = pygame.key.get_pressed()
+        pyprint(f"health: {health} / {maxhealth}", 25, (255, 255, 255), (320, 0))
+        if keys[pygame.K_w] and y > 0 or keys[pygame.K_UP] and y > dt:
+            y -= speed * dt
+        iofjdsa = 0
+        if keys[pygame.K_s] and y < 550 or keys[pygame.K_DOWN] and y < 550 - dt:
+            y += speed * dt
+        if keys[pygame.K_a] and x > 0 or keys[pygame.K_LEFT] and x > dt:
+            x -= speed * dt
+        if keys[pygame.K_d] and x < 750 or keys[pygame.K_RIGHT] and x < 750 - dt:
+            x += speed * dt
+        for i in guns:
+            if i[0] == inventory[gun]:
+                dsasa = guns.index(i)
+        if isinstance(i[1], int):
+            if keys[pygame.K_SPACE] and guns[bub][7] == 1:
+                iofjdsa = 1
+        if keys[pygame.K_1] and len(inventory) > 0:
+            gun = 0
+        if keys[pygame.K_2] and len(inventory) > 1:
+            gun = 1
+        if keys[pygame.K_3] and len(inventory) > 2:
+            gun = 2
+        if keys[pygame.K_q] and len(inventory) > 1 and dropitemsaaa <= 0:
+            inventory.pop(gun)
+            dropitemsaaa = 1
+            print(gun)
+            if isinstance(guns[dsasa][1], int):
+                money += guns[dsasa][9] / 2
+            else:
+                money += guns[dsasa][5] / 2
+            while len(inventory) - 1 < gun:
+                gun -= 1
+            while len(inventory) - 1 > gun:
+                gun += 1
+            print(gun)
+        if keys[pygame.K_LSHIFT] and dash <= 0:
+            dash = 1
+            mx, my = pygame.mouse.get_pos()
+            dx = mx - x
+            dy = my - y
+            dist = math.sqrt(dx*dx + dy*dy)
+            if dist == 0:
+                dist = 1
+            dx /= dist
+            dy /= dist
+            dash_speed = 800
+            dash_vel = [dx * dash_speed, dy * dash_speed]
+        x += dash_vel[0] * dt
+        y += dash_vel[1] * dt
+        dash_vel[0] *= 0.85 # type: ignore
+        dash_vel[1] *= 0.85 # type: ignore
+        if abs(dash_vel[0]) < 1:
+            dash_vel[0] = 0
+        if abs(dash_vel[1]) < 1:
+            dash_vel[1] = 0
+        pygame.draw.rect(screen, (0, 0, 255), (x, y, 50, 50))
+        for bot in bots:
+            pygame.draw.rect(screen, (0, 255, 0), (bot[0], bot[1], bot[2], bot[2]))
+        for explosion in explosions:
+            pygame.draw.rect(screen, (min(255 / max(explosion[3], 0.1), 255), 0, 0), (explosion[0], explosion[1], explosion[5], explosion[5]))
+       # for i in guns:
+       #     if i[8] > 0:
+       #         pyprint(f"{i[0]} aquired", 50, (255 / i[8], 255 / i[8], 255 / i[8]), (200, 150))
+        if bla > 0:
+            pyprint(f"{gotgun} aquired", 50, (255 * bla, 255 * bla, 255 * bla), (200, 150))
+        else:
+            gotgun = ''
+        pyprint(f"pts: {pts}", 30, (255, 255, 255), (700, 100))
+        #             message, scale, color, position
+        inventa = 200
+        for index, i in enumerate(inventory):
+            colo = (255, 255, 255)
+            if index == gun:
+                colo = (250, 250, 0)
+            pyprint(f"{index + 1} {i}", 25, (colo), (inventa, 500))
+            inventa += 100
+        pygame.display.flip()
