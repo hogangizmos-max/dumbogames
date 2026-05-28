@@ -1,6 +1,11 @@
 import random
 import json
 import os
+syslol = ""
+if os.name == "nt":
+    syslol = "cls"
+else:
+    syslol = "clear"
 move = "up.txt"
 high = "high.txt"
 trail = ["-", "|"]
@@ -11,6 +16,7 @@ Ai = 0
 cheats = 0
 zx = 0
 boarder = 1
+fdasofasd = "fffaaa   |||"
 def load(HIGHSCORE_FILE, aaa):
     if os.path.exists(HIGHSCORE_FILE):
         try:
@@ -131,8 +137,11 @@ while lose != 2 and win < 1:
         r = board[aip[0]]
         board[aip[0]] = r[:aip[1]] + AI + r[aip[1] + 1:]
     L = 0
-    os.system("clear")
-    print("_____")
+    os.system(syslol)
+    dslfao = ""
+    for i in ["_"] * int(format[1]):
+        dslfao = dslfao + i
+    print(dslfao)
     print(h)
     print(f"pts: {pts}")
     M = ""
@@ -140,7 +149,8 @@ while lose != 2 and win < 1:
         M = "|"
     if lose == 0:
         for row in board:
-            print(row + M)
+            print(M + row + M)
+        print(dslfao)
         xy = ""
         M = ""
         if boarder == 1:
@@ -202,7 +212,7 @@ while lose != 2 and win < 1:
     if random.randint(1, 3) == 1 and len(applep) < (format[0] * format[1]) ** 0.5:
         applep = applep + [random.randint(0, format[0] - 1),
                            random.randint(0, format[1] - 1)]
-    if playerp[1] > format[1] or playerp[1] < 0 or playerp[0] > format[0] or playerp[0] < 0 and loop == 0:
+    if (playerp[1] > format[1] or playerp[1] < 0 or playerp[0] > format[0] or playerp[0] < 0) and loop == 0:
         lose = 1
     if loop == 1:
         playerp[1] = (playerp[1]) % len(board[0])
@@ -212,14 +222,18 @@ while lose != 2 and win < 1:
     else:
         pasta = trail[0]
     pastp = pastp + playerp + [pasta]
-    pastp = pastp[len(pastp) - (pts * 3):]
+    pastp = pastp[len(pastp) - (pts * 3 + 3):]
     A = 6
-    while A / 3 < pts:
-        pra = pastp[len(pastp) - A]
-        xa = pastp[(len(pastp) - A) + 1]
-        A = A + 3
-        if xa == playerp[1] and pra == playerp[0]:
-            lose = 1
+    ronddasf = 0
+    while A / 3 < pts and ronddasf == 0:
+        try:
+            pra = pastp[len(pastp) - A]
+            xa = pastp[(len(pastp) - A) + 1]
+            A = A + 3
+            if xa == playerp[1] and pra == playerp[0]:
+                lose = 1
+        except:
+            ronddasf = 1
     if lose == 1:
         lose = 2
     if playerp[1] * playerp[0] == format[1] * format[0]:
