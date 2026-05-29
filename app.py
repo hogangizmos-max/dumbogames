@@ -3,6 +3,10 @@ import os
 
 app = Flask(__name__)
 
+@app.route("/boxguns")
+def boxguns():
+    return render_template("boxguns.html")
+    
 @app.route("/game/<game_name>")
 def game_page(game_name):
     return render_template("game.html", game=game_name)
