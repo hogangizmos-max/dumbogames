@@ -22,20 +22,18 @@
 <canvas id="game" width="1800" height="900"></canvas>
 
 <script>
+
+var board = { x: Array.from({ length: 18 }, (_, i) => i), y : Array.from({ length: 9 }, (_, i) => i) };
+
+
+var player = { x: 0, y: 0 }
+
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-let mouse = {
-    x: 0,
-    y: 0,
-    down: false
-};
+var dead = 0;
 
-let player = { x: 900, y: 450, size: 80 };
 let keys = {};
-
-var backgroundcolor = { r: 100, g: 0, b: 0 };
-var gamerunning = 0;
 
 document.addEventListener("keydown", e => {
     keys[e.key.toLowerCase()] = true;
@@ -45,76 +43,36 @@ document.addEventListener("keyup", e => {
     keys[e.key.toLowerCase()] = false;
 });
 
-canvas.addEventListener("mousedown", () => {
-    mouse.down = true;
-});
-
-canvas.addEventListener("mouseup", () => {
-    mouse.down = false;
-});
-
-canvas.addEventListener("mousemove", e => {
-    const rect = canvas.getBoundingClientRect();
-    mouse.x = e.clientX - rect.left;
-    mouse.y = e.clientY - rect.top;
-});
-
 function Game() {
-    function update() {
-        if (keys["w"] && player.y > 0) player.y -= 4;
-        if (keys["s"] && player.y < 900 - player.size) player.y += 4;
-        if (keys["a"] && player.x > 0) player.x -= 4;
-        if (keys["d"] && player.x < 1800 - player.size) player.x += 4;
+  ctx.fillStyle = " rgb(100, 0, 0)"
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  if (keys["w"] && player.y > 0) player.y -= 1;
+  if (keys["s"] && player.y < 8) player.y += 1;
+  if (keys["a"] && player.x > 0) player.x -= 1;
+  if (keys["d"] && player.x < 17) player.x += 1;
+  
+  for (const [index, x] of board.x.entries()) {
+    
+    for (const [indey, y] of board.y.entries()) {
+      
+      if (player.x === index && player.y === indey) {
+        ctx.fillStyle = "rgb(255, 0, 0)"
+      }
+      
+      else {
+        ctx.fillStyle = "rgb(0, 0, 0)"
+      }
+      
+      ctx.fillRect(index * 100, indey * 100, 100, 100)
+      
     }
-
-    function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        ctx.fillStyle = "blue";
-        ctx.fillRect(player.x, player.y, player.size, player.size);
-    }
-
-    update();
-    draw();
+    
+  }
+  requestAnimationFrame(Game);
 }
+Game()
 
-function Menu() {
-    ctx.fillStyle = `rgb(${backgroundcolor.r}, ${backgroundcolor.g}, ${backgroundcolor.b})`;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.font = "40px Arial";
-    ctx.fillStyle = "black";
-
-    ctx.fillText("JS BoxGuns", 100, 100);
-
-    ctx.fillStyle = "red";
-    ctx.fillRect(200, 200, 250, 50);
-
-    ctx.fillStyle = "black";
-    ctx.fillText("Play", 280, 238);
-
-    if (
-        mouse.down &&
-        mouse.x >= 200 &&
-        mouse.x <= 450 &&
-        mouse.y >= 200 &&
-        mouse.y <= 250
-    ) {
-        gamerunning = 1;
-    }
-}
-
-function loop() {
-    if (gamerunning === 1) {
-        Game();
-    } else {
-        Menu();
-    }
-
-    requestAnimationFrame(loop);
-}
-
-loop();
 </script>
 
 </body>
