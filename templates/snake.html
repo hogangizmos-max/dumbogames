@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JS BoxGuns</title>
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: black;
+        }
+
+        canvas {
+            display: block;
+            margin: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+<canvas id="game" width="1800" height="1000"></canvas>
+
+<script>
+
+let mouse = {
+  x: 0,
+  y: 0,
+  down: false
+};
+
+menukeyspaceing = { 0: false, 1: false, 2: false, 3: false, 4: false, 5: false, 6: false, 7: false, 8: false, 9: false }
+
+function RandomRandint(min, max) {return Math.floor(Math.random() * (max - min + 1)) + min;}
+
+function clear() {
+    board = {
+        x: Array.from({ length: 18 }, (_, i) => i),
+        y: Array.from({ length: 9 }, (_, i) => i)
+    };
+
+    pastkey = { w: false, a: false, s: false, d: false };
+
+    dead = false;
+    apples = [];
+    points = 0;
+    trail = [];
+    player = { x: 0, y: 0 };
+    applepop = [];
+    framemove = false;
+
+    keys = {};
+}
+
+var board = { x: Array.from({ length: 18 }, (_, i) => i), y : Array.from({ length: 9 }, (_, i) => i) };
+
+var maxapples = 6
+
+var pastkey = { w: false, a: false, s: false, d: false }
+
+var dead = false
+
+var apples = []
+
+var points = 0
+
+var trail = []
+
+var player = { x: 0, y: 0 }
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+var applepop = []
+
+var framemove = false;
+
+let keys = {};
+
+var applechance = 3
+
+canvas.addEventListener("mousedown", () => {
+    mouse.down = true;
+});
+
+canvas.addEventListener("mouseup", () => {
+    mouse.down = false;
+});
+
+canvas.addEventListener("mousemove", e => {
+    const rect = canvas.getBoundingClientRect();
+    mouse.x = e.clientX - rect.left;
+    mouse.y = e.clientY - rect.top;
+});
+
+document.addEventListener("keydown", e => {
+    keys[e.key.toLowerCase()] = true;
+});
+
+document.addEventListener("keyup", e => {
+    keys[e.key.toLowerCase()] = false;
+});
+
+document.addEventListener("keydown", e => {
+    const key = e.key;
+});
+
+function Menu() {
+  ctx.fillStyle = "black"
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+  ctx.fillStyle = "red"
+  ctx.fillRect(200, 200, 300, 100)
+  if (applechance === 1) ctx.fillStyle = "blue"; else ctx.fillStyle = "red";
+  ctx.fillRect(200, 400, 150, 33)
+  if (applechance === 2) ctx.fillStyle = "blue"; else ctx.fillStyle = "red";
+  ctx.fillRect(400, 400, 150, 33)
+  if (applechance === 3) ctx.fillStyle = "blue"; else ctx.fillStyle = "red";
+  ctx.fillRect(600, 400, 150, 33)
+  if (applechance === 4) ctx.fillStyle = "blue"; else ctx.fillStyle = "red";
+  ctx.fillRect(800, 400, 150, 33)
+  if (maxapples === 6) ctx.fillStyle = "blue"; else ctx.fillStyle = "red";
+  ctx.fillRect(200, 500, 150, 33)
+  if (maxapples === 12) ctx.fillStyle = "blue"; else ctx.fillStyle = "red";
+  ctx.fillRect(400, 500, 150, 33)
+  if (maxapples === 18) ctx.fillStyle = "blue"; else ctx.fillStyle = "red";
+  ctx.fillRect(600, 500, 150, 33)
+  if (maxapples === 24) ctx.fillStyle = "blue"; else ctx.fillStyle = "red";
+  ctx.fillRect(800, 500, 150, 33)
+  if (mouse.down) {
+    if (mouse.x >= 200 && mouse.x <= 350 && mouse.y >= 400 && mouse.y <= 433) applechance = 1;
+    if (mouse.x >= 400 && mouse.x <= 550 && mouse.y >= 400 && mouse.y <= 433) applechance = 2;
+    if (mouse.x >= 600 && mouse.x <= 750 && mouse.y >= 400 && mouse.y <= 433) applechance = 3;
+    if (mouse.x >= 800 && mouse.x <= 950 && mouse.y >= 400 && mouse.y <= 433) applechance = 4;
+    
+    if (mouse.x >= 200 && mouse.x <= 350 && mouse.y >= 500 && mouse.y <= 533) maxapples = 6;
+    if (mouse.x >= 400 && mouse.x <= 550 && mouse.y >= 500 && mouse.y <= 533) maxapples = 12;
+    if (mouse.x >= 600 && mouse.x <= 750 && mouse.y >= 500 && mouse.y <= 533) maxapples = 18;
+    if (mouse.x >= 800 && mouse.x <= 950 && mouse.y >= 500 && mouse.y <= 533) maxapples = 24;
+  }
+  ctx.fillStyle = "rgb(255, 255, 50)"
+  ctx.font = "20px Arial";
+  ctx.fillText("apple chance", 200, 400)
+  ctx.fillText("max apples on board", 200, 500)
+  ctx.fillText("25%", 200, 420)
+  ctx.fillText("50%", 400, 420)
+  ctx.fillText("75%", 600, 420)
+  ctx.fillText("100%", 800, 420)
+  ctx.fillText("6", 200, 520)
+  ctx.fillText("12", 400, 520)
+  ctx.fillText("18", 600, 520)
+  ctx.fillText("24", 800, 520)
+  ctx.font = "80px Arial";
+  ctx.fillText("play", 200, 280)
+  ctx.fillText("Snake Game", 50, 50)
+  if (mouse.down && mouse.x >= 200 && mouse.x <= 500 && mouse.y >= 200 && mouse.y <= 300) {
+    dead = false;
+    clear()
+  }
+}
+
+function Game() {
+  framemove = false;
+  ctx.fillStyle = " rgb(100, 0, 0)"
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  applepop = []
+  
+  if (keys["w"] && player.y > 0 && pastkey.w === false) {
+    trail.push({ x: player.x, y: player.y })
+    player.y -= 1;
+    pastkey.w = true;
+    framemove = true;
+  }
+  else if (keys["w"] === false && player.y > 0) pastkey.w = false;
+  if (keys["s"] && player.y < 8 && pastkey.s === false) {
+    trail.push({ x: player.x, y: player.y })
+    player.y += 1;
+    pastkey.s = true;
+    framemove = true;
+  }
+  else if (keys["s"] === false && player.y > 0) pastkey.s = false;
+  if (keys["a"] && player.x > 0 && pastkey.a === false) {
+    trail.push({ x: player.x, y: player.y })
+    player.x -= 1;
+    pastkey.a = true
+    framemove = true;
+  }
+  else if (keys["a"] === false) pastkey.a = false;
+  if (keys["d"] && player.x < 17 && pastkey.d === false) {
+    trail.push({ x: player.x, y: player.y })
+    player.x += 1;
+    pastkey.d = true;
+    framemove = true;
+  }
+  else if (keys["d"] === false) pastkey.d = false;
+  
+  if (RandomRandint(0, 100) <= applechance * 25 && framemove && apples.length < maxapples) {
+    apples.push({ x: RandomRandint(0, 17), y: RandomRandint(0, 8) })
+  }
+  if (framemove === true) {
+    apples.forEach((apple, index) => {
+        if (player.x === apple.x && player.y === apple.y) {
+            points += 1;
+            applepop.push(index);
+        }
+    });
+    
+    if (framemove) {
+      trail.splice(0, trail.length - points);
+      if (trail.some(trai => player.x === trai.x && player.y === trai.y)) dead = true;
+    }
+    
+    for (let i = applepop.length - 1; i >= 0; i--) {
+        apples.splice(applepop[i], 1);
+    }
+  }
+  for (const [index, x] of board.x.entries()) {
+    
+    for (const [indey, y] of board.y.entries()) {
+      
+      if (player.x === index && player.y === indey) {
+        ctx.fillStyle = "rgb(255, 0, 0)"
+      }
+      
+      else if (apples.some(apple => index === apple.x && indey === apple.y)) ctx.fillStyle = "rgb(0, 255, 0)";
+      
+      else if (trail.some(trai => index === trai.x && indey === trai.y)) {ctx.fillStyle = "rgb(255, 255, 0)";}
+      else {
+        ctx.fillStyle = "rgb(0, 0, 0)"
+      }
+      
+      ctx.fillRect(index * 100 + 2, indey * 100 + 2, 100 - 4, 100 - 4)
+      
+    }
+    
+  }
+  ctx.font = "80px Arial";
+  ctx.fillStyle = "black"
+  ctx.fillRect(0, 900, 1800, 100)
+  ctx.fillStyle = "rgb(255, 255, 255)";
+  ctx.fillText(`${points}`, 850, 990);
+}
+
+function loop() {
+  if (dead === false) Game();
+  
+  else Menu();
+  
+  requestAnimationFrame(loop);
+}
+loop();
+
+</script>
+
+</body>
+</html
