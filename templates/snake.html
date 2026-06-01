@@ -3,8 +3,6 @@
 <head>
     <title>JS BoxGuns</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
     <style>
         body {
             margin: 0;
@@ -52,6 +50,8 @@ function clear() {
     framemove = false;
 
     keys = {};
+    movingnow1 = "";
+    framemove1 = 0;
 }
 
 var board = { x: Array.from({ length: 18 }, (_, i) => i), y : Array.from({ length: 9 }, (_, i) => i) };
@@ -60,7 +60,13 @@ var maxapples = 6
 
 var pastkey = { w: false, a: false, s: false, d: false }
 
-var dead = false
+var movetype = "spam"
+
+var movingnow1 = "";
+
+var framemove1 = 0;
+
+var dead = true;
 
 var apples = []
 
@@ -128,6 +134,14 @@ function Menu() {
   ctx.fillRect(600, 500, 150, 33)
   if (maxapples === 24) ctx.fillStyle = "blue"; else ctx.fillStyle = "red";
   ctx.fillRect(800, 500, 150, 33)
+  
+  if (movetype == "spam") ctx.fillStyle = "blue"; else ctx.fillStyle = "red";
+  ctx.fillRect(200, 600, 150, 33)
+  if (movetype == "press") ctx.fillStyle = "blue"; else ctx.fillStyle = "red";
+  ctx.fillRect(400, 600, 150, 33)
+  if (movetype == "hold") ctx.fillStyle = "blue"; else ctx.fillStyle = "red";
+  ctx.fillRect(600, 600, 150, 33)
+  
   if (mouse.down) {
     if (mouse.x >= 200 && mouse.x <= 350 && mouse.y >= 400 && mouse.y <= 433) applechance = 1;
     if (mouse.x >= 400 && mouse.x <= 550 && mouse.y >= 400 && mouse.y <= 433) applechance = 2;
@@ -138,11 +152,16 @@ function Menu() {
     if (mouse.x >= 400 && mouse.x <= 550 && mouse.y >= 500 && mouse.y <= 533) maxapples = 12;
     if (mouse.x >= 600 && mouse.x <= 750 && mouse.y >= 500 && mouse.y <= 533) maxapples = 18;
     if (mouse.x >= 800 && mouse.x <= 950 && mouse.y >= 500 && mouse.y <= 533) maxapples = 24;
+    
+    if (mouse.x >= 200 && mouse.x <= 350 && mouse.y >= 600 && mouse.y <= 633) movetype = "spam";
+    if (mouse.x >= 400 && mouse.x <= 550 && mouse.y >= 600 && mouse.y <= 633) movetype = "press";
+    if (mouse.x >= 600 && mouse.x <= 750 && mouse.y >= 600 && mouse.y <= 633) movetype = "hold";
   }
   ctx.fillStyle = "rgb(255, 255, 50)"
   ctx.font = "20px Arial";
   ctx.fillText("apple chance", 200, 400)
   ctx.fillText("max apples on board", 200, 500)
+  ctx.fillText("movement type", 200, 600)
   ctx.fillText("25%", 200, 420)
   ctx.fillText("50%", 400, 420)
   ctx.fillText("75%", 600, 420)
@@ -151,6 +170,9 @@ function Menu() {
   ctx.fillText("12", 400, 520)
   ctx.fillText("18", 600, 520)
   ctx.fillText("24", 800, 520)
+  ctx.fillText("spam", 200, 620)
+  ctx.fillText("press", 400, 620)
+  ctx.fillText("hold", 600, 620)
   ctx.font = "80px Arial";
   ctx.fillText("play", 200, 280)
   ctx.fillText("Snake Game", 50, 50)
@@ -167,39 +189,107 @@ function Game() {
   
   applepop = []
   
-  if (keys["w"] && player.y > 0 && pastkey.w === false) {
-    trail.push({ x: player.x, y: player.y })
-    player.y -= 1;
-    pastkey.w = true;
-    framemove = true;
+  if (movetype === "spam") {
+    if (keys["w"] && player.y > 0 && pastkey.w === false) {
+      trail.push({ x: player.x, y: player.y })
+      player.y -= 1;
+      pastkey.w = true;
+      framemove = true;
+    }
+    else if (keys["w"] && player.y <= 0) dead = true;
+    else if (keys["w"] === false && player.y > 0) pastkey.w = false;
+    if (keys["s"] && player.y <= 8 && pastkey.s === false) {
+      trail.push({ x: player.x, y: player.y })
+      player.y += 1;
+      pastkey.s = true;
+      framemove = true;
+    }
+    else if (keys["s"] && player.y > 8) dead = true;
+    else if (keys["s"] === false && player.y > 0) pastkey.s = false;
+    if (keys["a"] && player.x >= 0 && pastkey.a === false) {
+      trail.push({ x: player.x, y: player.y })
+      player.x -= 1;
+      pastkey.a = true
+      framemove = true;
+    }
+    else if (keys["a"] && player.x < 0) dead = true;
+    else if (keys["a"] === false) pastkey.a = false;
+    if (keys["d"] && player.x < 18 && pastkey.d === false) {
+      trail.push({ x: player.x, y: player.y })
+      player.x += 1;
+      pastkey.d = true;
+      framemove = true;
+    }
+    else if (keys["d"] && player.x >= 18) dead = true;
+    else if (keys["d"] === false) pastkey.d = false;
   }
-  else if (keys["w"] === false && player.y > 0) pastkey.w = false;
-  if (keys["s"] && player.y < 8 && pastkey.s === false) {
-    trail.push({ x: player.x, y: player.y })
-    player.y += 1;
-    pastkey.s = true;
-    framemove = true;
+  else if (movetype === "press") {
+    framemove1 += .02
+    if (framemove1 >= 1) {
+      if (movingnow1 === "w" && player.y > 0) {
+        framemove1 = 0
+        trail.push({ x: player.x, y: player.y })
+        player.y -= 1;
+      }
+      else if (movingnow1 === "w" && player.y <= 0) dead = true;
+      else if (movingnow1 === "s" && player.y < 8) {
+        framemove1 = 0
+        trail.push({ x: player.x, y: player.y })
+        player.y += 1;
+      }
+      else if (movingnow1 === "s" && player.y >= 8) dead = true;
+      else if (movingnow1 === "a" && player.x > 0) {
+        framemove1 = 0
+        trail.push({ x: player.x, y: player.y })
+        player.x -= 1;
+      }
+      else if (movingnow1 === "a" && player.x <= 0) dead = true;
+      else if (movingnow1 === "d" && player.x < 17) {
+        framemove1 = 0
+        trail.push({ x: player.x, y: player.y })
+        player.x += 1;
+      }
+      else if (movingnow1 === "d" && player.x >= 17) dead = true;
+    }
+    if (keys["w"]) movingnow1 = "w";
+    else if (keys["s"]) movingnow1 = "s";
+    else if (keys["a"]) movingnow1 = "a";
+    if (keys["d"]) movingnow1 = "d";
   }
-  else if (keys["s"] === false && player.y > 0) pastkey.s = false;
-  if (keys["a"] && player.x > 0 && pastkey.a === false) {
-    trail.push({ x: player.x, y: player.y })
-    player.x -= 1;
-    pastkey.a = true
-    framemove = true;
+  else if (movetype === "hold") {
+    framemove1 += 0.02
+    if (framemove1 >= 1) {
+      if (keys["w"] && player.y > 0) {
+        framemove1 = 0
+        trail.push({ x: player.x, y: player.y })
+        player.y -= 1;
+      }
+      else if (keys["w"] && player.y <= 0) dead = true;
+      if (keys["s"] && player.y < 8) {
+        framemove1 = 0
+        trail.push({ x: player.x, y: player.y })
+        player.y += 1;
+      }
+      else if (keys["s"] && player.y >= 8) dead = true;
+      if (keys["a"] && player.x > 0) {
+        framemove1 = 0
+        trail.push({ x: player.x, y: player.y })
+        player.x -= 1;
+      }
+      else if (keys["a"] && player.x <= 0) dead = true;
+      if (keys["d"] && player.x < 17) {
+        framemove1 = 0
+        trail.push({ x: player.x, y: player.y })
+        player.x += 1;
+      }
+      else if (keys["a"] && player.x >= 17) dead = true;
+    }
   }
-  else if (keys["a"] === false) pastkey.a = false;
-  if (keys["d"] && player.x < 17 && pastkey.d === false) {
-    trail.push({ x: player.x, y: player.y })
-    player.x += 1;
-    pastkey.d = true;
-    framemove = true;
-  }
-  else if (keys["d"] === false) pastkey.d = false;
   
-  if (RandomRandint(0, 100) <= applechance * 25 && framemove && apples.length < maxapples) {
+  if (RandomRandint(0, 100) <= applechance * 25 && (framemove || (framemove1 === 0 && (movetype === "press" || movetype === "hold"))) && apples.length < maxapples) {
     apples.push({ x: RandomRandint(0, 17), y: RandomRandint(0, 8) })
   }
-  if (framemove === true) {
+  if (framemove === true || (framemove1 === 0 && (movetype === "press" || movetype === "hold"))) {
     apples.forEach((apple, index) => {
         if (player.x === apple.x && player.y === apple.y) {
             points += 1;
@@ -207,7 +297,7 @@ function Game() {
         }
     });
     
-    if (framemove) {
+    if (framemove || (framemove1 === 0 && (movetype === "press" || movetype === "hold"))) {
       trail.splice(0, trail.length - points);
       if (trail.some(trai => player.x === trai.x && player.y === trai.y)) dead = true;
     }
@@ -223,6 +313,8 @@ function Game() {
       if (player.x === index && player.y === indey) {
         ctx.fillStyle = "rgb(255, 0, 0)"
       }
+      
+      else if ((apples.some(apple => index === apple.x && indey === apple.y)) && (trail.some(trai => index === trai.x && indey === trai.y))) ctx.fillStyle = "rgb(150, 255, 150)";
       
       else if (apples.some(apple => index === apple.x && indey === apple.y)) ctx.fillStyle = "rgb(0, 255, 0)";
       
@@ -240,7 +332,7 @@ function Game() {
   ctx.fillStyle = "black"
   ctx.fillRect(0, 900, 1800, 100)
   ctx.fillStyle = "rgb(255, 255, 255)";
-  ctx.fillText(`${points}`, 850, 990);
+  ctx.fillText(`${player.x} ${player.y}`, 850, 990);
 }
 
 function loop() {
@@ -254,7 +346,5 @@ loop();
 
 </script>
 
-<a class="back-button" href="/websitegames">Back</a>
-
 </body>
-</html>
+</html
