@@ -52,7 +52,10 @@ function clear() {
     keys = {};
     movingnow1 = "";
     framemove1 = 0;
+    cooldown = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 }
+
+var cooldown = [false, false, false, false, false, false, false, false, false, false]
 
 var board = { x: Array.from({ length: 18 }, (_, i) => i), y : Array.from({ length: 9 }, (_, i) => i) };
 
@@ -60,7 +63,11 @@ var maxapples = 6
 
 var pastkey = { w: false, a: false, s: false, d: false }
 
+var cooldowncount1 = 50
+
 var movetype = "spam"
+
+var changingcoolldonw11 = [false, 20, 0]
 
 var movingnow1 = "";
 
@@ -114,6 +121,7 @@ document.addEventListener("keydown", e => {
 });
 
 function Menu() {
+  changingcoolldonw11[2] += .1
   ctx.fillStyle = "black"
   ctx.fillRect(0, 0, canvas.width, canvas.height)
   ctx.fillStyle = "red"
@@ -135,12 +143,15 @@ function Menu() {
   if (maxapples === 24) ctx.fillStyle = "blue"; else ctx.fillStyle = "red";
   ctx.fillRect(800, 500, 150, 33)
   
-  if (movetype == "spam") ctx.fillStyle = "blue"; else ctx.fillStyle = "red";
+  if (movetype === "spam") ctx.fillStyle = "blue"; else ctx.fillStyle = "red";
   ctx.fillRect(200, 600, 150, 33)
-  if (movetype == "press") ctx.fillStyle = "blue"; else ctx.fillStyle = "red";
+  if (movetype === "press") ctx.fillStyle = "blue"; else ctx.fillStyle = "red";
   ctx.fillRect(400, 600, 150, 33)
-  if (movetype == "hold") ctx.fillStyle = "blue"; else ctx.fillStyle = "red";
+  if (movetype === "hold") ctx.fillStyle = "blue"; else ctx.fillStyle = "red";
   ctx.fillRect(600, 600, 150, 33)
+  
+  if (movetype === "press" || movetype === "hold") ctx.fillStyle = "blue"; else ctx.fillStyle = "red";
+  ctx.fillRect(500, 680, 150, 33)
   
   if (mouse.down) {
     if (mouse.x >= 200 && mouse.x <= 350 && mouse.y >= 400 && mouse.y <= 433) applechance = 1;
@@ -156,6 +167,22 @@ function Menu() {
     if (mouse.x >= 200 && mouse.x <= 350 && mouse.y >= 600 && mouse.y <= 633) movetype = "spam";
     if (mouse.x >= 400 && mouse.x <= 550 && mouse.y >= 600 && mouse.y <= 633) movetype = "press";
     if (mouse.x >= 600 && mouse.x <= 750 && mouse.y >= 600 && mouse.y <= 633) movetype = "hold";
+    
+    if (mouse.x >= 500 && mouse.x <= 650 && mouse.y >= 680 && mouse.y <= 713 && changingcoolldonw11[2] >= changingcoolldonw11[1]) {
+      changingcoolldonw11[0] = !changingcoolldonw11[0];
+      changingcoolldonw11[2] = 0
+    }
+  }
+  if (changingcoolldonw11[0]) {
+    if (keys["backspace"]) cooldowncount1 = Math.floor(cooldowncount1 / 10);;
+    for (const number of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) {
+      ctx.fillText(number, 100 * number, 40)
+      if (keys[String(number)] && cooldown[number] === false) {
+        cooldowncount1 = Number(String(cooldowncount1) + String(number));
+        cooldown[number] = true
+      }
+      else if (keys[String(number)] === false) cooldown[number] = false;
+    }
   }
   ctx.fillStyle = "rgb(255, 255, 50)"
   ctx.font = "20px Arial";
@@ -173,6 +200,7 @@ function Menu() {
   ctx.fillText("spam", 200, 620)
   ctx.fillText("press", 400, 620)
   ctx.fillText("hold", 600, 620)
+  ctx.fillText(`${cooldowncount1} frames`, 500, 700)
   ctx.font = "80px Arial";
   ctx.fillText("play", 200, 280)
   ctx.fillText("Snake Game", 50, 50)
@@ -196,8 +224,8 @@ function Game() {
       pastkey.w = true;
       framemove = true;
     }
-    else if (keys["w"] && player.y <= 0) dead = true;
-    else if (keys["w"] === false && player.y > 0) pastkey.w = false;
+    else if (keys["w"] && player.y === 0 && pastkey.w === false) dead = true;
+    else if (keys["w"] === false) pastkey.w = false;
     if (keys["s"] && player.y <= 8 && pastkey.s === false) {
       trail.push({ x: player.x, y: player.y })
       player.y += 1;
@@ -224,7 +252,7 @@ function Game() {
     else if (keys["d"] === false) pastkey.d = false;
   }
   else if (movetype === "press") {
-    framemove1 += .02
+    framemove1 += 1 / cooldowncount1
     if (framemove1 >= 1) {
       if (movingnow1 === "w" && player.y > 0) {
         framemove1 = 0
@@ -257,7 +285,7 @@ function Game() {
     if (keys["d"]) movingnow1 = "d";
   }
   else if (movetype === "hold") {
-    framemove1 += 0.02
+    framemove1 += 1 / cooldowncount1
     if (framemove1 >= 1) {
       if (keys["w"] && player.y > 0) {
         framemove1 = 0
@@ -332,7 +360,7 @@ function Game() {
   ctx.fillStyle = "black"
   ctx.fillRect(0, 900, 1800, 100)
   ctx.fillStyle = "rgb(255, 255, 255)";
-  ctx.fillText(`${points}`, 850, 990);
+  ctx.fillText(`${player.x} ${player.y}`, 850, 990);
 }
 
 function loop() {
