@@ -150,7 +150,7 @@ function Menu() {
   if (movetype === "hold") ctx.fillStyle = "blue"; else ctx.fillStyle = "red";
   ctx.fillRect(600, 600, 150, 33)
   
-  if (movetype === "press" || movetype === "hold") ctx.fillStyle = "blue"; else if (changingcoolldonw11[0]) ctx.fillStyle = "green"; else ctx.fillStyle = "red";
+  if (changingcoolldonw11[0]) ctx.fillStyle = "green"; else if (movetype === "press" || movetype === "hold") ctx.fillStyle = "blue"; else ctx.fillStyle = "red";
   ctx.fillRect(500, 680, 150, 33)
   
   if (mouse.down) {
