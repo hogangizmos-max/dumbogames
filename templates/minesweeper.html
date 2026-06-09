@@ -36,7 +36,7 @@ let mouse = {
 function RandomRandint(min, max) {return Math.floor(Math.random() * (max - min + 1)) + min;}
 
 function Generate(surface) {
-  for (const [index, i] of Array(20).entries()) {
+  for (const [index, i] of Array(50).entries()) {
     surface[RandomRandint(0, format[0] * format[1])] = 1
   }
   return surface
