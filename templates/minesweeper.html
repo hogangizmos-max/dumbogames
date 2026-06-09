@@ -46,7 +46,15 @@ let mouse = {
 
 function RandomRandint(min, max) {return Math.floor(Math.random() * (max - min + 1)) + min;}
 
+function clear() {
+  board = Generate(Array(format[0] * format[1]).fill(0));
+  dead = false;
+  discovered = Array(format[0] * format[1]).fill(0);
+}
+
 var board = Generate(Array(format[0] * format[1]).fill(0));
+
+var dead = false;
 
 var discovered = Array(format[0] * format[1]).fill(0);
 
@@ -79,6 +87,19 @@ document.addEventListener("keydown", e => {
     const key = e.key;
 });
 
+function Menu() {
+  ctx.fillStyle = "red";
+  ctx.fillRect(900, 100, 200, 50);
+  ctx.fillStyle = "black";
+  ctx.font = "30px Arial"
+  ctx.fillText("Play Again", 900, 150)
+  if (mouse.down) {
+    if (mouse.x > 900 && mouse.x < 1100 && mouse.y > 100 && mouse.y < 150) {
+      clear();
+    }
+  }
+}
+
 function Game() {
   ctx.fillStyle = "rgb(50, 50, 50)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -90,24 +111,30 @@ function Game() {
     }
   }
   if (mouse.down) {
-    ctx.fillStyle = "blue"
-    ctx.fillRect(1, 1, 100, 100)
     if (mouse.x < format[0] * 50 && mouse.x > 0 && mouse.y < format[1] * 50 && mouse.y > 0) {
-      ctx.fillStyle = "red"
-      ctx.fillRect(1, 1, 100, 100)
       for (const [x, i] of Array(16).entries()) {
         for (const [y, i] of Array(16).entries()) {
           if (mouse.x > x * 50 && mouse.x < x * 50 + 50 && mouse.y > y * 50 && mouse.y < y * 50 + 50) {
             discovered[x * 16 + y] = 1;
+            if (board[x * 16 + y] === 1) ctx.fillStyle = "rgb(100, 0, 0)"; else ctx.fillStyle = "rgb(100, 100, 100)"
+            ctx.fillRect(x * 50 + 2, y * 50 + 2, 46, 46)
+            if (board[x * 16 + y] === 1) {
+              dead = true;
+              ctx.fillText("dead", 900, 100);
+            }
           }
         }
       }
     }
   }
-  requestAnimationFrame(Game)
 }
-Game()
-
+function loop() {
+  ctx.fillStyle = "red"
+  ctx.font = "100px arial"
+  if (dead === false) Game(); else Menu();
+  requestAnimationFrame(loop)
+}
+loop();
 </script>
 
 </body>
