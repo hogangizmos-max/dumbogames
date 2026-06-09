@@ -41,7 +41,7 @@ def code():
     
 @app.route("/websitegames")
 def websitegames():
-    websitegames_list = ["snake"]
+    websitegames_list = ["snake", "minesweeper"]
     return render_template("websitegames.html", websitegames_list=websitegames_list)
 
 @app.route("/websitegames/<game_name>")
