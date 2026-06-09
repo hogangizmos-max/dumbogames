@@ -25,17 +25,6 @@
 
 var format = [16, 16]
 
-function Generate(surface) {
-  var bombs = 0
-  for (const [index, i] of surface.entries()) {
-    if (RandomRandint(1, 8 * bombs / 4) === 1 && bombs < 20) {
-      bombs += 1
-      surface[index] = 1
-    }
-  }
-  return surface
-}
-
 let keys = {};
 
 let mouse = {
@@ -45,6 +34,13 @@ let mouse = {
 };
 
 function RandomRandint(min, max) {return Math.floor(Math.random() * (max - min + 1)) + min;}
+
+function Generate(surface) {
+  for (const [index, i] of Array(20).entries()) {
+    surface[RandomRandint(0, format[0] * format[1])] = 1
+  }
+  return surface
+}
 
 function clear() {
   board = Generate(Array(format[0] * format[1]).fill(0));
@@ -116,12 +112,20 @@ function Game() {
         for (const [y, i] of Array(16).entries()) {
           if (mouse.x > x * 50 && mouse.x < x * 50 + 50 && mouse.y > y * 50 && mouse.y < y * 50 + 50) {
             discovered[x * 16 + y] = 1;
-            if (board[x * 16 + y] === 1) ctx.fillStyle = "rgb(100, 0, 0)"; else ctx.fillStyle = "rgb(100, 100, 100)"
-            ctx.fillRect(x * 50 + 2, y * 50 + 2, 46, 46)
             if (board[x * 16 + y] === 1) {
               dead = true;
               ctx.fillText("dead", 900, 100);
+              for (const [x, i] of Array(16).entries()) {
+                for (const [y, i] of Array(16).entries()) {
+                  if (board[x * 16 + y] === 1) {
+                    ctx.fillStyle = "rgb(150, 0, 0)"
+                    ctx.fillRect(x * 50 + 2, y * 50 + 2, 46, 46)
+                  }
+                }
+              }
             }
+            if (board[x * 16 + y] === 1) ctx.fillStyle = "rgb(100, 0, 0)"; else ctx.fillStyle = "rgb(100, 100, 100)"
+            ctx.fillRect(x * 50 + 2, y * 50 + 2, 46, 46)
           }
         }
       }
