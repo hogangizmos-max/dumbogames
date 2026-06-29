@@ -11,7 +11,7 @@ def game_page(game_name):
 def download(game_name, platform):
     if platform == "windows":
         folder = "windows"
-        filename = f"{game_name}.exe"
+        filename = f"{game_name}.zip"
     elif platform == "linux":
         folder = "linux"
         filename = f"{game_name}.zip"
