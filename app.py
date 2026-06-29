@@ -29,7 +29,7 @@ def home():
 
 @app.route("/games")
 def games():
-    games_list = ["textsnake"]
+    games_list = ["textsnake", "Dungeon crawler"]
     return render_template("games.html", games=games_list)
 
 @app.route("/code")
