@@ -6,13 +6,10 @@
 
 <h1 class="glow-animate">{{ game }}</h1>
 
-<!-- GIF -->
 <img src="{{ url_for('static', filename='previews/' + game + '.gif') }}" width="600">
 
 <br><br>
 
-<!-- WINDOWS -->
-<!-- WINDOWS -->
 <div class="windows-container">
 
     <a class="button" href="/download/{{ game }}/windows">
@@ -21,9 +18,9 @@
 
     <div class="windows-info">
         <p class="normal-text">
-            Go to Downloads — your file will be there:
+            Go to Downloads — your zip folder with game and items will be there:
             <br>
-            <b>{{ game }}.exe</b>
+            <b>{{ game }}.zip</b>
         </p>
     </div>
 
