@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Geometry Dash - Canvas</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        background: #111;
+        color: white;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+    }
+
+    #gameCanvas {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+        background: linear-gradient(#17244a, #10152c);
+    }
+
+    #ui {
+        position: fixed;
+        top: 15px;
+        left: 20px;
+        font-size: 22px;
+        font-weight: bold;
+        z-index: 2;
+        text-shadow: 2px 2px #000;
+    }
+
+    #message {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        pointer-events: none;
+        font-size: 36px;
+        font-weight: bold;
+        text-align: center;
+        text-shadow: 3px 3px #000;
+    }
+</style>
+</head>
+
+<body>
+
+<canvas id="gameCanvas"></canvas>
+
+</div>
+
+
+<script>
+var upgrades = [
+	["regen", "+ 1x regen", "#FF0000", "B34400"], 
+	["max health", "+ 1x max health", "#FF0059", "#7A0059"], 	["damage", "+ 1x damage", "#5400E8", "#441C87"], 
+	["speed", "+ 1x speed", "#2ED100", "#44663A"]
+]
+var choiceipgrade = []
+var pressing = false
+var upgrade = false
+var pressedat = [0,0,25]
+var presstype = "start"
+var moving = [0.0,0.0]
+var dead = false
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+var touchX = 0;
+var touchY = 0;
+var past = false;
+
+function random(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+let W, H;
+let groundY;
+var score = 0
+function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    W = canvas.width;
+    H = canvas.height;
+}
+
+window.addEventListener("resize", resize);
+resize();
+
+
+const player = {
+   x: 150,
+   y: 200,
+   size: 42,
+	health: 100,
+	regen: 0,
+	buffs: {
+		regen: 1,
+		damage: 1,
+		speed: 1,
+		health: 1
+	}
+	
+};
+
+
+var bullets = []
+var bots = []
+
+
+
+function getmove(x, y) {
+	
+	x = x - player.x;
+	y = y - player.y;
+	dist = (x * x+ y* y) ** .5;
+	x /= dist;
+	y /= dist;
+	moving = [x,y]
+
+	
+}
+
+canvas.addEventListener("touchstart", e => {
+    e.preventDefault();
+    pressing = true;
+    updateCoordinates(e);
+	 presstype = "start"
+	 ctx.fillStyle = "rgb(50, 50, 50)"
+
+	pressedat = [touchX, touchY, 25]
+	player.regen = 0;
+});
+
+
+canvas.addEventListener("touchmove", e => {
+    e.preventDefault();
+    if (pressing) {
+        updateCoordinates(e);
+    }
+});
+
+canvas.addEventListener("touchend", e => {
+    e.preventDefault();
+    pressing = false;
+});
+
+canvas.addEventListener("mousedown", e => {
+    e.preventDefault();
+    pressing = true;
+    updateCoordinates(e);
+	 presstype = "start"
+	 ctx.fillStyle = "rgb(50, 50, 50)"
+
+	pressedat = [touchX, touchY, 25]
+	player.regen = 0;
+});
+
+
+canvas.addEventListener("mousemove", e => {
+    e.preventDefault();
+    if (pressing) {
+        updateCoordinates(e);
+    }
+});
+
+canvas.addEventListener("mouseup", e => {
+    e.preventDefault();
+    pressing = false;
+});
+
+
+function updateCoordinates(e) {
+    const rect = canvas.getBoundingClientRect();
+
+    if (e.touches) {
+        const touch = e.touches[0];
+
+        if (touch) {
+            touchX = touch.clientX - rect.left;
+            touchY = touch.clientY - rect.top;
+        }
+    } else {
+        touchX = e.clientX - rect.left;
+        touchY = e.clientY - rect.top;
+    }
+}
+
+
+function spawn() {
+	
+	bots.push({x: player.x + random(100, 300) * [-1, 1][random(0,1)], y: player.y + random(100, 300) * [-1, 1][random(0,1)], health: 100 * (1 + score / 80), time: 0});
+}
+
+function moveBots() {
+
+	index = 0
+	for (const bot of bots) {
+		x = bot.x - player.x 
+		y = bot.y - player.y
+		dist = (x * x + y * y) ** .5
+		bots[index].x -= x / dist * (1 + bot.time / 2)
+		bots[index].y -= y / dist * (1 + bot.time/ 2)
+		bots[index].time += .005
+		index += 1
+	}
+}
+
+function collision() {
+
+	for (const bot of bots) {
+		
+		if (player.x - bot.x < bot.health / 4 + 25 && bot.x - player.x < player.size && player.y - bot.y < bot.health / 4 + 25 && bot.y - player.y < player.size) {
+		player.health = Math.max(player.health - .2, 0);
+		player.regen = 0;
+		}
+	}
+
+}
+
+function damagebots() {
+    let index = 0;
+    while (index < bots.length) {
+        let bot = bots[index];
+        let botCenterX = bot.x + (bot.health / 4 + 25) / 2;
+        let botCenterY = bot.y + (bot.health / 4 + 25) / 2;
+
+        let dx = botCenterX - pressedat[0];
+        let dy = botCenterY - pressedat[1];
+        let dist = (dx * dx + dy * dy) ** 0.5;
+
+        if (dist < pressedat[2] + 50) { 
+            bot.health -= 2 * player.buffs.damage;
+            if (bot.health <= 0) {
+					  score += .75
+                bots.splice(index, 1);
+            } else {
+                index += 1;
+            }
+        } else {
+            index += 1;
+        }
+    }
+}
+
+function update() {
+
+	 moveBots();
+	 collision();
+	 if (pressedat[2] < 500) {damagebots();}
+	
+	 if (player.health <= 0) {dead = true;}
+
+	 if (random(0, Math.max(60 / (score / 17 + 1), 1)) === 0 && bots.length < 20) {
+	 	spawn();
+	 }
+
+	 if (pressing === true) {
+	 	
+   	getmove(touchX, 	touchY);
+	}
+
+	 player.x = Math.max(Math.min(player.x + moving[0] * (3 + score / 17) * player.buffs.speed, canvas.width - player.size),0)
+	 player.y = Math.max(Math.min(player.y + moving[1] * (3 + score / 17) * player.buffs.speed, canvas.height - player.size),0)
+	
+	player.regen += .03 * player.buffs.regen;
+	if (player.regen >= 1) {
+		player.health = Math.min(player.health + .1 * player.buffs.regen, player.buffs.health * 100);
+	}
+	
+	if (score >= 100) {
+	 ctx.fillStyle = "#FFFFF"
+	 
+	 if (String(Math.floor(score)).slice(-2) == "00") {
+		upgrade = true;
+		choiceupgrade = [upgrades[random(0,3)], upgrades[random(0,3)]]
+	 }
+	}
+
+	 score += .05;
+    
+}
+
+function drawbots() {
+	
+	for (const bot of bots) {
+		ctx.fillStyle = `rgb(${Math.min(Math.floor(bot.time * 100), 255)}, ${255 - Math.max(Math.floor(bot.time * 100), 0)}, 0)`
+		ctx.fillRect(bot.x, bot.y, bot.health / 4 + 25, bot.health / 4 + 25);
+		
+		var warp = (bot.health / 4 + 25) / 50
+		
+		ctx.fillStyle = "#000"
+		ctx.fillRect(Math.floor((bot.x + 10 * warp)), Math.floor(bot.y + (20 * warp)), Math.floor(10 * warp), Math.floor(10 * warp))
+	
+		ctx.fillRect(Math.floor(bot.x + (30 * warp)),(Math.floor(bot.y + 20 * warp)), Math.floor(10 * warp), Math.floor(10 * warp))
+
+		ctx.beginPath();
+
+		ctx.moveTo((Math.floor(bot.x + 15 * warp)), (Math.floor(bot.y + (15 - bot.time) * warp)));
+
+		ctx.lineTo(Math.floor((bot.x + (25 - bot.time) * warp)), (Math.floor(bot.y + 25 * warp)));
+
+
+		ctx.lineWidth = 2;
+
+		ctx.stroke();
+		
+		ctx.beginPath();
+
+		ctx.moveTo((Math.floor(bot.x + 35 * warp)), (Math.floor(bot.y + (15 - bot.time) * warp)));
+
+		ctx.lineTo((Math.floor(bot.x + (25 + bot.time) * warp)), (Math.floor(bot.y + 25 * warp)));
+
+
+		ctx.lineWidth = 2;
+
+		ctx.stroke();
+		
+	}
+}
+
+function drawBackground() {
+
+    // Sky
+    const gradient = ctx.createLinearGradient(
+        0, 0, 0, H
+    );
+
+    gradient.addColorStop(0, "#253c82");
+    gradient.addColorStop(1, "#10152c");
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, W, H);
+
+}
+
+function drawPlayer() {
+
+    ctx.save();
+
+    ctx.translate(
+        player.x + player.size / 2,
+        player.y + player.size / 2
+    );
+
+    let angle = Math.atan2(moving[1], moving[0]);
+    ctx.rotate(angle + 1.5);
+
+
+    ctx.fillStyle = "#00eaff";
+
+    ctx.fillRect(
+        -player.size / 2,
+        -player.size / 2,
+        player.size,
+        player.size
+    );
+
+
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 3;
+
+    ctx.strokeRect(
+        -player.size / 2 + 5,
+        -player.size / 2 + 5,
+        player.size - 10,
+        player.size - 10
+    );
+
+
+   
+    ctx.fillStyle = "#10152c";
+
+    ctx.fillRect(-13, -10, 8, 8);
+    ctx.fillRect(5, -10, 8, 8);
+
+
+    // Mouth
+    ctx.fillRect(
+        -10,
+        7,
+        20,
+        5
+    );
+
+    ctx.restore();
+}
+
+
+function drawUI() {
+
+	ctx.font = "25px Arial";
+
+	ctx.fillStyle = "#000000";
+	ctx.fillText("score " + Math.floor(score), canvas.width / 2 - 38, 23)
+	
+	ctx.fillStyle = "#FFF";
+	ctx.fillText("score " + Math.floor(score), canvas.width / 2 - 35, 20);
+	
+	ctx.fillStyle = "rgb(50, 50, 50)"
+	ctx.fillRect(100, 25, canvas.width - 200, 25)
+	
+	ctx.fillStyle = "rgb(255, 50, 50)"
+	ctx.fillRect(100, 25, (player.health * (canvas.width / (player.buffs.health * 100)  - 2)), 25)
+	
+}
+
+
+function draw() {
+
+	 drawBackground();
+	 drawbots();
+    drawPlayer();
+	 drawUI();
+}
+
+function reset() {
+    player.x = 150;
+    player.y = 200;
+    player.size = 42;
+    player.health = 100;
+	 player.regen = 0;
+	 player.buffs.regen = 1;
+	 player.buffs.damage = 1;
+	 player.buffs.speed = 1;
+	 player.buffs.health = 1;
+
+    bots = [];
+    score = 0;
+    dead = false;
+	 moving = [0,0]
+}
+
+function death() {
+	draw();
+	
+	ctx.fillStyle = "rgb(50, 50, 50, .7)";
+	ctx.fillRect(0, 0, canvas.width, canvas.height);
+	
+	ctx.fillStyle = "rgb(255,255,255)";
+	ctx.fillText("play again", canvas.width / 2 - 70, canvas.height / 2 - 10);
+	
+	ctx.fillStyle = "rgb(5,5,5)";
+	ctx.fillText("play again", canvas.width / 2 - 68, canvas.height / 2 - 8);
+
+	ctx.fillStyle = "rgb(255,255,255)";
+	ctx.fillText("score: " + Math.floor(score), canvas.width / 2 - 50, canvas.height / 2 - 100);
+	
+	ctx.fillStyle = "rgb(5,5,5)";
+	ctx.fillText("score: " + Math.floor(score), canvas.width / 2 - 48, canvas.height / 2 - 98);	
+	
+	
+	if (pressing === true && past === false) {
+		reset();
+	}
+}
+
+function choosebuff() {
+    draw();
+
+    ctx.fillStyle = "rgba(50, 50, 50, .7)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+	 ctx.fillStyle = "rgb(200, 200, 200, .9)"
+	 
+	 ctx.fillText("regen: " + player.buffs.regen + "x", 25, 15)
+	
+	 ctx.fillText("max health: " + player.buffs.speed + "x", 25, 35)
+	
+	 ctx.fillText("speed: " + player.buffs.speed + "x", 25, 55)
+	
+	 ctx.fillText("damage: " + player.buffs.damage + "x", 25, 75)
+
+    ctx.fillStyle = choiceupgrade[0][3];
+    ctx.fillRect(
+        canvas.width / 6,
+        canvas.height / 4,
+        canvas.width / 6,
+        canvas.height / 2
+    );
+
+    ctx.fillStyle = choiceupgrade[0][2];
+    ctx.fillText(
+        choiceupgrade[0][0],
+        canvas.width / 6,
+        canvas.height / 4 + 15
+    );
+
+
+    ctx.fillStyle = choiceupgrade[1][3];
+    ctx.fillRect(
+        canvas.width * (4/6),
+        canvas.height / 4,
+        canvas.width / 6,
+        canvas.height / 2
+    );
+
+    ctx.fillStyle = choiceupgrade[1][2];
+    ctx.fillText(
+        choiceupgrade[1][0],
+        canvas.width * (4/6),
+        canvas.height / 4 + 15
+    );
+
+    if (pressing === true && past === false) {
+        if (touchX >= canvas.width / 6 && touchX <= canvas.width / 3 && touchY >= canvas.height / 4 && touchY <= canvas.height * 3 / 4
+        ) {
+            upgrade = false;
+				 score += 2
+				 if (choiceupgrade[0][0] === "regen") {player.buffs.regen += 3 * Math.floor(score / 100);}
+				 else if (choiceupgrade[0][0] === "health") {player.buffs.health += 3 * Math.floor(score / 100);}
+				else if (choiceupgrade[0][0] === "damage") {player.buffs.damage += 3 * Math.floor(score / 100);}
+				else {player.buffs.speed += 3 * Math.floor(score / 100);}
+				 
+        }
+        else if (touchX >= canvas.width * (4/6) && touchX <= canvas.width * (5/6) && touchY >= canvas.height / 4 && touchY <= canvas.height * 3 / 4
+        ) {
+            upgrade = false;
+				 score += 2
+				 if (choiceupgrade[1][0] === "regen") {player.buffs.regen += 3 * Math.floor(score / 100);}
+				 else if (choiceupgrade[1][0] === "max health") {player.buffs.health += 3 * Math.floor(score / 100);}
+				else if (choiceupgrade[1][0] === "damage") {player.buffs.damage += 3 * Math.floor(score / 100);}
+				else {player.buffs.speed += 3 * Math.floor(score / 100);}
+		  }
+    }
+}
+
+function gameLoop() {
+
+	if (upgrade === true) {
+		choosebuff();
+	}
+
+	else if (dead === false) {
+    update();
+    draw();
+	}
+	else {
+		death();
+	}
+
+	if (pressing === true) {
+	
+		ctx.fillStyle = "rgb(255, 255, 50)";
+		ctx.fillRect(touchX - 25, touchY - 25, 50, 50);
+	
+	}
+	
+	pressedat[2] += 20
+	ctx.lineWidth = 3
+	
+	ctx.strokeStyle = "rgb(255, 255, 50)"
+	
+	ctx.strokeRect(pressedat[0] - pressedat[2], pressedat[1] - pressedat[2], pressedat[2] * 2, pressedat[2] * 2)
+	
+	past = pressing
+	requestAnimationFrame(gameLoop);
+}
+
+
+
+gameLoop();
+
+</script>
+
+</body>
+</html>
+
