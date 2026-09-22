@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Geometry Dash - Canvas</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        background: #111;
+        color: white;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+    }
+
+    #gameCanvas {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+        background: linear-gradient(#17244a, #10152c);
+    }
+
+    #ui {
+        position: fixed;
+        top: 15px;
+        left: 20px;
+        font-size: 22px;
+        font-weight: bold;
+        z-index: 2;
+        text-shadow: 2px 2px #000;
+    }
+
+    #message {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        pointer-events: none;
+        font-size: 36px;
+        font-weight: bold;
+        text-align: center;
+        text-shadow: 3px 3px #000;
+    }
+</style>
+</head>
+
+<body>
+
+<canvas id="gameCanvas"></canvas>
+
+</div>
+
+
+<script>
+
+function random(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+function range(num) {
+    let arr = [];
+
+    for (let i = 0; i < num; i++) {
+        arr.push(i);
+    }
+
+    return arr;
+}
+
+var zoom = 0
+var movingnow = [0,0, false]
+var pressing = false
+var presstype = "start"
+var moving = [0.0,0.0]
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+let W, H;
+let groundY;
+var score = 0
+function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    W = canvas.width;
+    H = canvas.height;
+}
+
+
+var objects = [[10, -200 , 100]]
+for (const i of range(5)) {
+    objects.push([random(0, canvas.width), random(-3000, canvas.Height), random(50, 100)])
+}
+
+window.addEventListener("resize", resize);
+resize();
+
+
+const player = {
+   x: 150,
+   y: 200,
+   size: 42,
+	momentum: {
+		x: 0,
+		y: 0
+	},
+	
+};
+
+
+
+canvas.addEventListener("touchstart", e => {
+    e.preventDefault();
+    pressing = true;
+    updateCoordinates(e);
+	 presstype = "start"
+
+});
+
+
+canvas.addEventListener("touchmove", e => {
+    e.preventDefault();
+    if (pressing) {
+        updateCoordinates(e);
+    }
+});
+
+canvas.addEventListener("touchend", e => {
+    e.preventDefault();
+    pressing = false;
+});
+
+canvas.addEventListener("mousedown", e => {
+    e.preventDefault();
+    pressing = true;
+    updateCoordinates(e);
+	 presstype = "start"
+	
+});
+
+
+canvas.addEventListener("mousemove", e => {
+    e.preventDefault();
+    if (pressing) {
+        updateCoordinates(e);
+    }
+});
+
+canvas.addEventListener("mouseup", e => {
+    e.preventDefault();
+    pressing = false;
+});
+
+
+function updateCoordinates(e) {
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    if (touch) {
+        touchX = touch.clientX - rect.left;
+        touchY = touch.clientY - rect.top;
+    }
+}
+
+
+
+function update() {
+
+	player.x -= player.momentum.x 
+	player.y -= player.momentum.y
+	
+	let friction = 0.98;
+
+	player.momentum.x *= friction;
+	player.momentum.y *= friction;
+	
+	if (player.y - zoom < 100 && player.momentum.y > 0) {
+		zoom = player.y - 100
+	}
+	
+	else if (player.y - zoom > canvas.height - 125 && player.momentum.y < 0) {
+	zoom = player.y - (canvas.height - 125)
+	}
+
+	if (Math.abs(player.momentum.x) < 0.05) {
+    player.momentum.x = 0;
+	}
+
+	if (Math.abs(player.momentum.y) < 0.05) {
+    player.momentum.y = 0;
+	}
+	
+	var z = 0;
+
+	for (const object of objects) {
+
+    	const objectX = object[0];
+    	const objectY = object[1];
+    	const objectSize = object[2];
+
+    	if (player.x < objectX + objectSize && player.x + player.size > objectX && player.y < objectY + objectSize && player.y + player.size > objectY) {z = 1;}
+	}
+	
+	if ((player.x < 0 && player.momentum.x > 0) || (player.x > canvas.width - player.size && player.momentum.x < 0) || z === 1) {
+	player.momentum.x *= -1;
+	score += 1;
+	}
+
+var z = 0;
+
+	for (const object of objects) {
+
+    	const objectX = object[0];
+    	const objectY = object[1];
+    	const objectSize = object[2];
+
+    	if (player.x < objectX + objectSize && player.x + player.size > objectX && player.y < objectY + objectSize && player.y + player.size > objectY) {z = 1;}
+	}
+
+
+	if ((player.y < -3000 && player.momentum.y > 0) || (player.y > canvas.height - player.size && player.momentum.y < 0) || z === 1) {
+	player.momentum.y *= -1;
+	score += 1;
+	}
+	
+	if (pressing === false && movingnow[2] === true) {
+		dx = touchX - player.x 
+		dy = touchY - (player.y - zoom)
+		
+		player.momentum.x /= 2;
+		player.momentum.y /= 2;
+		
+		player.momentum.x += dx * 0.1;
+		player.momentum.y += dy * 0.1;
+		movingnow[2] = false;
+	}
+	else if (pressing === true) {
+		movingnow = [touchX, touchY, true];
+	}
+    
+}
+
+
+function drawBackground() {
+
+    const gradient = ctx.createLinearGradient(
+        0, 0, 0, H
+    );
+
+    gradient.addColorStop(0, "#253c82");
+    gradient.addColorStop(1, "#10152c");
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, W, H);
+
+}
+
+function drawPlayer() {
+
+    ctx.save();
+
+    ctx.translate(
+        player.x + player.size / 2,
+        player.y + player.size / 2 - zoom
+    );
+
+    let angle = Math.atan2(moving[1], moving[0]);
+
+
+    ctx.fillStyle = "#00eaff";
+
+    ctx.fillRect(
+        -player.size / 2,
+        -player.size / 2,
+        player.size,
+        player.size
+    );
+
+
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 3;
+
+    ctx.strokeRect(
+        -player.size / 2 + 5,
+        -player.size / 2 + 5,
+        player.size - 10,
+        player.size - 10
+    );
+
+
+   
+    ctx.fillStyle = "#10152c";
+
+    ctx.fillRect(-13, -10, 8, 8);
+    ctx.fillRect(5, -10, 8, 8);
+
+
+    // Mouth
+    ctx.fillRect(
+        -10,
+        7,
+        20,
+        5
+    );
+
+    ctx.restore();
+
+
+	 if (pressing === true) {
+	 	ctx.beginPath();
+
+	 	ctx.moveTo(player.x + player.size / 2, player.y + player.size / 2 - zoom);
+	 	ctx.lineTo(touchX, touchY);
+
+	 	ctx.strokeStyle = "rgb(255, 255, 255, .7)";
+	 	ctx.lineWidth = 5;
+
+	 	ctx.stroke();
+	 }
+}
+
+function drawObjects() {
+
+	ctx.fillStyle = "rgb(100, 100, 100)";
+	for (const object of objects) {
+		ctx.fillRect(object[0], object[1] - zoom, object[2], object[2]);
+	}
+	
+	ctx.fillRect(0, canvas.height - zoom, canvas.width, 800)
+	ctx.fillRect(0, -3800 - zoom, canvas.width, 800)
+}
+
+
+function drawUI() {
+
+	ctx.font = "25px Arial";
+
+	ctx.fillStyle = "#000000";
+	ctx.fillText("score " + Math.floor(score), canvas.width / 2 - 38, 23)
+	
+	ctx.fillStyle = "#FFF";
+	ctx.fillText("score " + Math.floor(score), canvas.width / 2 - 35, 20);
+	
+}
+
+
+function draw() {
+
+	drawBackground();
+	drawObjects();
+   drawPlayer();
+	drawUI();
+}
+
+
+
+function gameLoop() {
+
+
+	update();
+	draw();
+	
+	if (pressing === true) {
+	
+		ctx.fillStyle = "rgb(255, 255, 50)";
+		ctx.fillRect(touchX - 25, touchY - 25, 50, 50);
+	
+	}
+	
+		requestAnimationFrame(gameLoop);
+}
+
+
+
+gameLoop();
+
+</script>
+
+</body>
+</html>
+
